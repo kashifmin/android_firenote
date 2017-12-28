@@ -29,10 +29,10 @@ class LoginActivity : AppCompatActivity() {
         presentLogin()
         mAuth = FirebaseAuth.getInstance()
         mAuth?.addAuthStateListener {
-            showStatus("Auth state listener called")
             if(mAuth!!.currentUser != null) {
                 showStatus("Already signed in.")
                 startActivity(Intent(this, HomeActivity::class.java))
+                finish()
             }
         }
     }

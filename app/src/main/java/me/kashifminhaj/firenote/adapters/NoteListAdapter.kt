@@ -24,7 +24,7 @@ class NoteListAdapter(var data: MutableList<Note>) : RecyclerView.Adapter<NoteLi
         return ViewHolder(v)
     }
 
-    class ViewHolder(val v: View): RecyclerView.ViewHolder(v) {
+    class ViewHolder(v: View): RecyclerView.ViewHolder(v) {
         fun bindNoteItem(note: Note) {
             with(note) {
                 itemView.titleView.text = note.title
