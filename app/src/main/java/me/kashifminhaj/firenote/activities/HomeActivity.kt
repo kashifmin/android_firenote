@@ -24,7 +24,7 @@ class HomeActivity : AppCompatActivity() {
         addNoteFAB.setOnClickListener { addNote() }
         mDb = FirebaseDatabase.getInstance().reference
 
-        adapter = NoteListAdapter(noteList)
+        adapter = NoteListAdapter(noteList, this::editNote)
         noteListRecycler.layoutManager = LinearLayoutManager(this)
         noteListRecycler.adapter = adapter
 
@@ -41,7 +41,9 @@ class HomeActivity : AppCompatActivity() {
         val path = "users/" + FirebaseAuth.getInstance().currentUser?.uid + "/notes"
         mDb.child(path ).addChildListener({
             dataSnapshot, prevChildName ->
-            noteList += dataSnapshot?.getValue(Note::class.java)!!
+            val note = dataSnapshot?.getValue(Note::class.java)!!
+            note.id = dataSnapshot.key
+            noteList += note
             adapter.notifyDataSetChanged()
         }, {
             dataSnapshot ->
@@ -49,5 +51,11 @@ class HomeActivity : AppCompatActivity() {
             adapter.notifyDataSetChanged()
         })
 
+    }
+
+    fun editNote(note: Note) {
+        val i = Intent(this, EditNoteActivity::class.java)
+        i.putExtra(EditNoteActivity.EXTRA_NOTE, note)
+        startActivity(i)
     }
 }

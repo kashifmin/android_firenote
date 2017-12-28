@@ -13,7 +13,6 @@ import me.kashifminhaj.firenote.models.Note
 class EditNoteActivity : AppCompatActivity() {
     companion object {
         val EXTRA_NOTE = "note"
-        val EXTRA_NOTE_ID = "noteid"
     }
 
     lateinit var note: Note
@@ -25,6 +24,9 @@ class EditNoteActivity : AppCompatActivity() {
         if (!intent.hasExtra(EXTRA_NOTE)) finish()
 
         note = intent.getSerializableExtra(EXTRA_NOTE) as Note
+        noteTitle.text.append(note.title)
+        noteContent.text.append(note.content)
+
         mDb = FirebaseDatabase.getInstance().reference
         saveBtn.setOnClickListener { save() }
     }
@@ -36,10 +38,10 @@ class EditNoteActivity : AppCompatActivity() {
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val path = "users/" + uid + "/notes"
-        val key = mDb.child(path).push().key
+        val key = if (note.id.equals("")) mDb.child(path).push().key else note.id
         val childUpdates: MutableMap<String, Any> = HashMap()
 
-        childUpdates[path + "/" + key] = note
+        childUpdates[path + "/" + key] = note.toMap()
         mDb.updateChildren(childUpdates).addOnCompleteListener { onSaveComplete() }
 
     }

@@ -11,7 +11,7 @@ import me.kashifminhaj.firenote.models.Note
 /**
  * Created by kashif on 27/12/17.
  */
-class NoteListAdapter(var data: MutableList<Note>) : RecyclerView.Adapter<NoteListAdapter.ViewHolder>() {
+class NoteListAdapter(var data: MutableList<Note>, val onItemClick: (Note) -> Unit) : RecyclerView.Adapter<NoteListAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
         holder!!.bindNoteItem(data[position])
     }
@@ -21,15 +21,16 @@ class NoteListAdapter(var data: MutableList<Note>) : RecyclerView.Adapter<NoteLi
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent?.context)
                 .inflate(R.layout.card_note, parent, false)
-        return ViewHolder(v)
+        return ViewHolder(v, onItemClick)
     }
 
-    class ViewHolder(v: View): RecyclerView.ViewHolder(v) {
+    class ViewHolder(v: View, val onItemClick: (Note) -> Unit): RecyclerView.ViewHolder(v) {
         fun bindNoteItem(note: Note) {
             with(note) {
                 itemView.titleView.text = note.title
                 itemView.contentView.text = note.content
             }
+            itemView.setOnClickListener { onItemClick(note)  }
         }
     }
 }
