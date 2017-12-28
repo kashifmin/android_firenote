@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_home.*
 import me.kashifminhaj.firenote.R
 import me.kashifminhaj.firenote.adapters.NoteListAdapter
+import me.kashifminhaj.firenote.extensions.addChildListener
 import me.kashifminhaj.firenote.models.Note
 
 class HomeActivity : AppCompatActivity() {
@@ -37,24 +39,14 @@ class HomeActivity : AppCompatActivity() {
 
     fun loadNotes() {
         val path = "users/" + FirebaseAuth.getInstance().currentUser?.uid + "/notes"
-        mDb.child(path ).addChildEventListener(object: ChildEventListener {
-            override fun onCancelled(p0: DatabaseError?) {
-            }
-
-            override fun onChildMoved(p0: DataSnapshot?, p1: String?) {
-            }
-
-            override fun onChildChanged(p0: DataSnapshot?, p1: String?) {
-            }
-
-            override fun onChildAdded(dataSnapshot: DataSnapshot?, prevChildName: String?) {
-                noteList += dataSnapshot?.getValue(Note::class.java)!!
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onChildRemoved(p0: DataSnapshot?) {
-            }
-
+        mDb.child(path ).addChildListener({
+            dataSnapshot, prevChildName ->
+            noteList += dataSnapshot?.getValue(Note::class.java)!!
+            adapter.notifyDataSetChanged()
+        }, {
+            dataSnapshot ->
+            noteList.remove(dataSnapshot?.getValue(Note::class.java))
+            adapter.notifyDataSetChanged()
         })
 
     }
