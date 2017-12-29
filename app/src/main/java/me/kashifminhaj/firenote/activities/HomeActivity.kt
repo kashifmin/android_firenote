@@ -4,13 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_home.*
 import me.kashifminhaj.firenote.R
 import me.kashifminhaj.firenote.adapters.NoteListAdapter
-import me.kashifminhaj.firenote.extensions.addChildListener
 import me.kashifminhaj.firenote.models.Note
 
 class HomeActivity : AppCompatActivity() {
@@ -24,9 +24,6 @@ class HomeActivity : AppCompatActivity() {
         addNoteFAB.setOnClickListener { addNote() }
         mDb = FirebaseDatabase.getInstance().reference
 
-        adapter = NoteListAdapter(noteList, this::editNote)
-        noteListRecycler.layoutManager = LinearLayoutManager(this)
-        noteListRecycler.adapter = adapter
 
         loadNotes()
     }
@@ -39,17 +36,13 @@ class HomeActivity : AppCompatActivity() {
 
     fun loadNotes() {
         val path = "users/" + FirebaseAuth.getInstance().currentUser?.uid + "/notes"
-        mDb.child(path ).addChildListener({
-            dataSnapshot, prevChildName ->
-            val note = dataSnapshot?.getValue(Note::class.java)!!
-            note.id = dataSnapshot.key
-            noteList += note
-            adapter.notifyDataSetChanged()
-        }, {
-            dataSnapshot ->
-            noteList.remove(dataSnapshot?.getValue(Note::class.java))
-            adapter.notifyDataSetChanged()
-        })
+        val query = mDb.child(path).limitToFirst(20)
+        val options = FirebaseRecyclerOptions.Builder<Note>()
+                .setQuery(query, Note::class.java)
+                .build()
+        adapter = NoteListAdapter(options, this::editNote)
+        noteListRecycler.layoutManager = LinearLayoutManager(this)
+        noteListRecycler.adapter = adapter
 
     }
 
@@ -57,5 +50,15 @@ class HomeActivity : AppCompatActivity() {
         val i = Intent(this, EditNoteActivity::class.java)
         i.putExtra(EditNoteActivity.EXTRA_NOTE, note)
         startActivity(i)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        adapter.startListening()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        adapter.stopListening()
     }
 }

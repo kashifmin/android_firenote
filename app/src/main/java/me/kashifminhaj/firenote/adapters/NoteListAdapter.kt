@@ -4,6 +4,8 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.firebase.ui.database.FirebaseRecyclerAdapter
+import com.firebase.ui.database.FirebaseRecyclerOptions
 import kotlinx.android.synthetic.main.card_note.view.*
 import me.kashifminhaj.firenote.R
 import me.kashifminhaj.firenote.models.Note
@@ -11,12 +13,11 @@ import me.kashifminhaj.firenote.models.Note
 /**
  * Created by kashif on 27/12/17.
  */
-class NoteListAdapter(var data: MutableList<Note>, val onItemClick: (Note) -> Unit) : RecyclerView.Adapter<NoteListAdapter.ViewHolder>() {
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder!!.bindNoteItem(data[position])
+class NoteListAdapter(options: FirebaseRecyclerOptions<Note>, val onItemClick: (Note) -> Unit) : FirebaseRecyclerAdapter<Note, NoteListAdapter.ViewHolder>(options) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, note: Note) {
+        note.id = this.getRef(position).key
+        holder.bindNoteItem(note)
     }
-
-    override fun getItemCount(): Int = data.size
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent?.context)
